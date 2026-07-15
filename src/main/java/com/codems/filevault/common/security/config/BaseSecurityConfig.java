@@ -43,11 +43,11 @@ public class BaseSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-        config.setAllowedHeaders(Arrays.asList(configProperties.getAllowedHeaders()));
-        config.setAllowedMethods(Arrays.asList(configProperties.getAllowedMethods()));
-        config.setAllowedOrigins(Arrays.asList(configProperties.getAllowedOrigins()));
-        config.setAllowCredentials(configProperties.isAllowCredentials());
-        config.setMaxAge(configProperties.getMaxAge());
+        config.setAllowedHeaders(Arrays.asList(configProperties.allowedHeaders()));
+        config.setAllowedMethods(Arrays.asList(configProperties.allowedMethods()));
+        config.setAllowedOrigins(Arrays.asList(configProperties.allowedOrigins()));
+        config.setAllowCredentials(configProperties.allowCredentials());
+        config.setMaxAge(configProperties.maxAge());
         source.registerCorsConfiguration("/**", config);
         return source;
     }

@@ -51,18 +51,18 @@ app:
     allowed-methods: "*"
     allowed-headers: "*"
     max-age: 3600
-file:
-  allowed-types:
-    jpg: image/jpeg
-    jpeg: image/jpeg
-    png: image/png
-    pdf: application/pdf
-    docx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
-  storage:
-    root-path: ./storage/local
-  upload:
-    max-size: 10MB
-  cleanup:
-    enabled: false
-    fixed-delay: PT1H
-    orphan-grace-period: PT24H
+  file:
+    allowed-types:
+      jpg: image/jpeg
+      jpeg: image/jpeg
+      png: image/png
+      pdf: application/pdf
+      docx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    storage:
+      root-path: ./storage/local
+    upload:
+      max-size: 10MB
+    cleanup:
+      enabled: false
+      fixed-delay: PT1H
+      orphan-grace-period: PT24H

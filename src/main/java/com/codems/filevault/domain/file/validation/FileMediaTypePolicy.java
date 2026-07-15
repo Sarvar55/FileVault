@@ -1,6 +1,6 @@
 package com.codems.filevault.domain.file.validation;
 
-import com.codems.filevault.common.config.properties.FileTypeProperties;
+import com.codems.filevault.common.config.properties.AppFileProperties;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class FileMediaTypePolicy {
 
-    private final FileTypeProperties properties;
+    private final AppFileProperties properties;
 
     public boolean supports(String extension) {
-        return properties.getAllowedTypes().keySet().stream()
+        return properties.allowedTypes().keySet().stream()
                 .map(value -> value.toLowerCase(Locale.ROOT))
                 .anyMatch(extension::equals);
     }
@@ -22,7 +22,7 @@ public class FileMediaTypePolicy {
             return false;
         }
         String normalizedContentType = contentType.split(";", 2)[0].trim().toLowerCase(Locale.ROOT);
-        return properties.getAllowedTypes().entrySet().stream()
+        return properties.allowedTypes().entrySet().stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase(extension))
                 .map(entry -> entry.getValue().trim().toLowerCase(Locale.ROOT))
                 .anyMatch(normalizedContentType::equals);

@@ -25,15 +25,7 @@ public class SecurityPaths {
     @Bean("userPaths")
     public List<String> userPaths() {
         return List.of(
-                "/api/profile/**",
                 "/api/files/**"
-        );
-    }
-
-    @Bean("adminPaths")
-    public List<String> adminPaths() {
-        return List.of(
-                "/api/users/admin/**"
         );
     }
 }

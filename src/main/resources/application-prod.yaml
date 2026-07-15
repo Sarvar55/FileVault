@@ -46,18 +46,18 @@ app:
     allowed-methods: ${CORS_ALLOWED_METHODS}
     allowed-headers: ${CORS_ALLOWED_HEADERS}
     max-age: ${CORS_MAX_AGE}
-file:
-  allowed-types:
-    jpg: ${FILE_ALLOWED_TYPES_JPG}
-    jpeg: ${FILE_ALLOWED_TYPES_JPEG}
-    png: ${FILE_ALLOWED_TYPES_PNG}
-    pdf: ${FILE_ALLOWED_TYPES_PDF}
-    docx: ${FILE_ALLOWED_TYPES_DOCX}
-  storage:
-    root-path: ${FILE_STORAGE_ROOT_PATH}
-  upload:
-    max-size: ${FILE_UPLOAD_MAX_SIZE}
-  cleanup:
-    enabled: ${FILE_CLEANUP_ENABLED}
-    fixed-delay: ${FILE_CLEANUP_FIXED_DELAY}
-    orphan-grace-period: ${FILE_CLEANUP_ORPHAN_GRACE_PERIOD}
+  file:
+    allowed-types:
+      jpg: ${FILE_ALLOWED_TYPES_JPG}
+      jpeg: ${FILE_ALLOWED_TYPES_JPEG}
+      png: ${FILE_ALLOWED_TYPES_PNG}
+      pdf: ${FILE_ALLOWED_TYPES_PDF}
+      docx: ${FILE_ALLOWED_TYPES_DOCX}
+    storage:
+      root-path: ${FILE_STORAGE_ROOT_PATH}
+    upload:
+      max-size: ${FILE_UPLOAD_MAX_SIZE}
+    cleanup:
+      enabled: ${FILE_CLEANUP_ENABLED}
+      fixed-delay: ${FILE_CLEANUP_FIXED_DELAY}
+      orphan-grace-period: ${FILE_CLEANUP_ORPHAN_GRACE_PERIOD}

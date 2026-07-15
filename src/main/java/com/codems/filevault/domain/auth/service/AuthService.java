@@ -1,8 +1,6 @@
 package com.codems.filevault.domain.auth.service;
 
-import com.codems.filevault.common.exceptions.types.BaseException;
 import com.codems.filevault.common.security.service.JwtService;
-import com.codems.filevault.domain.auth.AuthErrorType;
 import com.codems.filevault.domain.auth.dto.AuthResponse;
 import com.codems.filevault.domain.auth.dto.LoginRequest;
 import com.codems.filevault.domain.auth.dto.RegisterRequest;
@@ -12,7 +10,6 @@ import com.codems.filevault.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,18 +38,12 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
-        if (authentication.getPrincipal() instanceof User) {
-            User user = (User) authentication.getPrincipal();
-            return token(user);
-        } else {
-            User user = userRepository.findByEmail(request.email())
-                    .orElseThrow(() -> BaseException.of(AuthErrorType.INVALID_TOKEN));
-            return token(user);
-        }
+        User user = (User) authentication.getPrincipal();
+        return token(user);
     }
 
     private AuthResponse token(User user) {
-        return AuthResponse.bearer(
+        return AuthResponse.of(
                 jwtService.generateAccessToken(user),
                 jwtService.expiresAt(),
                 userMapper.toResponse(user)

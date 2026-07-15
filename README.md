@@ -18,6 +18,7 @@ A production-ready **secure file storage API** built with **Spring Boot 4.1**. F
 - **OpenAPI / Swagger UI** — Auto-generated interactive docs at `/swagger-ui.html`
 - **Flyway Migrations** — Database schema managed via versioned SQL scripts
 - **Multi-profile Configuration** — `local` (H2), `dev` (PostgreSQL), `prod` (PostgreSQL + secrets)
+- **HTTPS Enforcement in Production** — HTTP requests are redirected to HTTPS in the `prod` security profile
 - **Docker & Docker Compose** — Containerized deployment with Docker secrets support
 
 ---
@@ -171,6 +172,7 @@ Base path: `/api` — All endpoints are versioned with header `X-VERSION-API: 1.
 - Passwords are BCrypt-encoded via Spring's `DelegatingPasswordEncoder`
 - **Compromised password detection** via [HaveIBeenPwned API](https://haveibeenpwned.com/Passwords) on registration
 - JWT signing uses HMAC-SHA256
+- Production profile redirects HTTP traffic to HTTPS via Spring Security `redirectToHttps`
 - Path traversal attacks are blocked in filename validation
 - Magic-byte (file signature) validation prevents MIME-type spoofing
 
@@ -182,11 +184,17 @@ Base path: `/api` — All endpoints are versioned with header `X-VERSION-API: 1.
 |--------------------------------|-----------------------------|-------------------------------------|
 | `app.jwt.secret`               | *(required)*                | JWT signing key (min 32 chars)      |
 | `app.jwt.expiration`           | `3600000` (1 hour)          | Token expiration in milliseconds    |
-| `file.storage.root-path`       | `./storage/dev`             | Root directory for stored files     |
-| `file.upload.max-size`         | `10MB`                      | Maximum file upload size            |
-| `file.cleanup.enabled`         | `true`                      | Enable/disable orphan file cleanup  |
-| `file.cleanup.fixed-delay`     | `PT1H`                      | Cleanup job interval (ISO 8601)     |
-| `file.cleanup.orphan-grace-period` | `PT24H`                | Grace period before orphan deletion |
+| `app.file.storage.root-path`   | `./storage/dev`             | Root directory for stored files     |
+| `app.file.upload.max-size`     | `10MB`                      | Maximum file upload size            |
+| `app.file.cleanup.enabled`     | `true`                      | Enable/disable orphan file cleanup  |
+| `app.file.cleanup.fixed-delay` | `PT1H`                      | Cleanup job interval (ISO 8601)     |
+| `app.file.cleanup.orphan-grace-period` | `PT24H`            | Grace period before orphan deletion |
+
+### Production HTTPS Redirect
+
+In the `prod` profile, Spring Security redirects plain HTTP requests to HTTPS using
+`redirectToHttps`. This is configured in `ProdSecurityConfig` and is only active when the
+application runs with `SPRING_PROFILES_ACTIVE=prod`.
 
 ---
 

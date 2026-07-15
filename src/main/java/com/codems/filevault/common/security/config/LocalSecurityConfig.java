@@ -26,21 +26,19 @@ public class LocalSecurityConfig {
 
     private final List<String> publicPaths;
     private final List<String> userPaths;
-    private final List<String> adminPaths;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public LocalSecurityConfig(LocalAuthenticationProvider localAuthenticationProvider, @Qualifier("publicPaths") List<String> publicPaths, @Qualifier("userPaths") List<String> userPaths, @Qualifier("adminPaths") List<String> adminPaths, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public LocalSecurityConfig(LocalAuthenticationProvider localAuthenticationProvider, @Qualifier("publicPaths") List<String> publicPaths, @Qualifier("userPaths") List<String> userPaths, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.localAuthenticationProvider = localAuthenticationProvider;
         this.publicPaths = publicPaths;
         this.userPaths = userPaths;
-        this.adminPaths = adminPaths;
+
         this.customAccessDeniedHandler = customAccessDeniedHandler;
         this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +46,6 @@ public class LocalSecurityConfig {
                 .authorizeHttpRequests(auth -> {
                             publicPaths.forEach(path -> auth.requestMatchers(path).permitAll());
                             userPaths.forEach(path -> auth.requestMatchers(path).hasRole(Role.USER.name()));
-                            adminPaths.forEach(path -> auth.requestMatchers(path).hasRole(Role.ADMIN.name()));
                             auth.anyRequest().denyAll();
                         }
                 )

@@ -16,7 +16,7 @@ public class FileDownloadAuditService {
 
     private final FileMetadataRepository fileMetadataRepository;
     private final FileDownloadAuditRepository fileDownloadAuditRepository;
-    
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void record(User user, Long fileId) {
         FileMetadata fileRef = fileMetadataRepository.getReferenceById(fileId);

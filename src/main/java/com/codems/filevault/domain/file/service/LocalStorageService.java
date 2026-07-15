@@ -1,6 +1,6 @@
 package com.codems.filevault.domain.file.service;
 
-import com.codems.filevault.common.config.properties.FileStorageProperties;
+import com.codems.filevault.common.config.properties.AppFileProperties;
 import com.codems.filevault.common.exceptions.types.BaseException;
 import com.codems.filevault.domain.file.entity.FileErrorType;
 import com.codems.filevault.domain.file.dto.StoredFile;
@@ -31,7 +31,7 @@ public class LocalStorageService implements StorageService {
 
     private static final String SHA_256 = "SHA-256";
 
-    private final FileStorageProperties properties;
+    private final AppFileProperties properties;
 
     @PostConstruct
     void createStorageRoot() throws IOException {
@@ -115,7 +115,7 @@ public class LocalStorageService implements StorageService {
     }
 
     private Path rootPath() {
-        return Path.of(properties.getRootPath()).toAbsolutePath().normalize();
+        return Path.of(properties.storage().rootPath()).toAbsolutePath().normalize();
     }
 
     private Instant lastModifiedInstant(Path path) {

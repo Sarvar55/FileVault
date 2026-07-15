@@ -32,11 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Qualifier("publicPaths")
     private final List<String> publicPaths;
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return publicPaths.stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
-    }
 
     @Override
     protected void doFilterInternal(
@@ -72,5 +67,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return publicPaths.stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
     }
 }

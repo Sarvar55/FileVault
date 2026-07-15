@@ -59,10 +59,10 @@ public class JwtService {
     }
 
     private Instant expiresAt(Instant issuedAt) {
-        return issuedAt.plusMillis(jwtProperties.getExpiration());
+        return issuedAt.plusMillis(jwtProperties.expiration());
     }
 
     private SecretKey signingKey() {
-        return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -1,7 +1,8 @@
 package com.codems.filevault.domain.file.service;
 
-import com.codems.filevault.common.config.properties.FileCleanupProperties;
+import com.codems.filevault.common.config.properties.AppFileProperties;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
 
 final class OrphanCleanupMother {
@@ -14,14 +15,17 @@ final class OrphanCleanupMother {
     private OrphanCleanupMother() {
     }
 
-    static FileCleanupProperties defaultProperties() {
+    static AppFileProperties defaultProperties() {
         return withGracePeriod(Duration.ofHours(24));
     }
 
-    static FileCleanupProperties withGracePeriod(Duration gracePeriod) {
-        FileCleanupProperties properties = new FileCleanupProperties();
-        properties.setOrphanGracePeriod(gracePeriod);
-        return properties;
+    static AppFileProperties withGracePeriod(Duration gracePeriod) {
+        return new AppFileProperties(
+                Map.of("pdf", "application/pdf"),
+                new AppFileProperties.Storage("./storage/test"),
+                new AppFileProperties.Upload(org.springframework.util.unit.DataSize.ofMegabytes(10)),
+                new AppFileProperties.Cleanup(true, Duration.ofHours(1), gracePeriod)
+        );
     }
 
     static Set<String> orphanFilenames() {

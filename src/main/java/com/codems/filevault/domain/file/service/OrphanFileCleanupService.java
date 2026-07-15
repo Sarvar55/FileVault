@@ -1,6 +1,6 @@
 package com.codems.filevault.domain.file.service;
 
-import com.codems.filevault.common.config.properties.FileCleanupProperties;
+import com.codems.filevault.common.config.properties.AppFileProperties;
 import com.codems.filevault.domain.file.repository.FileMetadataRepository;
 import java.time.Instant;
 import java.util.HashSet;
@@ -14,14 +14,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "file.cleanup", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "app.file.cleanup", name = "enabled", havingValue = "true")
 public class OrphanFileCleanupService {
 
     private final StorageService storageService;
     private final FileMetadataRepository fileMetadataRepository;
-    private final FileCleanupProperties properties;
+    private final AppFileProperties properties;
 
-    @Scheduled(fixedDelayString = "${file.cleanup.fixed-delay}")
+    @Scheduled(fixedDelayString = "${app.file.cleanup.fixed-delay}")
     public void cleanup() {
         deleteFilesOfSoftDeletedRecords();
         deleteOrphanFiles();
@@ -39,7 +39,7 @@ public class OrphanFileCleanupService {
 
     private void deleteOrphanFiles() {
 
-        Instant threshold = Instant.now().minus(properties.getOrphanGracePeriod());
+        Instant threshold = Instant.now().minus(properties.cleanup().orphanGracePeriod());
         Set<String> oldStoredFilenames = storageService.findStoredFilenamesModifiedBefore(threshold);
         if (oldStoredFilenames.isEmpty()) {
             return;

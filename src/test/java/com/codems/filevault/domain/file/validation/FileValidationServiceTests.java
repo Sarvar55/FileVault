@@ -3,8 +3,7 @@ package com.codems.filevault.domain.file.validation;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.codems.filevault.common.config.properties.FileTypeProperties;
-import com.codems.filevault.common.config.properties.FileUploadProperties;
+import com.codems.filevault.common.config.properties.AppFileProperties;
 import com.codems.filevault.common.exceptions.types.BaseException;
 import com.codems.filevault.domain.file.entity.FileErrorType;
 import java.io.ByteArrayOutputStream;
@@ -25,17 +24,19 @@ class FileValidationServiceTests {
 
     @BeforeEach
     void setUp() {
-        FileUploadProperties properties = new FileUploadProperties();
-        properties.setMaxSize(DataSize.ofMegabytes(10));
-        FileTypeProperties typeProperties = new FileTypeProperties();
-        typeProperties.setAllowedTypes(Map.of(
+        AppFileProperties properties = new AppFileProperties(
+                Map.of(
                 "jpg", "image/jpeg",
                 "jpeg", "image/jpeg",
                 "png", "image/png",
                 "pdf", "application/pdf",
                 "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ));
-        FileMediaTypePolicy fileMediaTypePolicy = new FileMediaTypePolicy(typeProperties);
+                ),
+                new AppFileProperties.Storage("./storage/test"),
+                new AppFileProperties.Upload(DataSize.ofMegabytes(10)),
+                new AppFileProperties.Cleanup(false, java.time.Duration.ofHours(1), java.time.Duration.ofHours(24))
+        );
+        FileMediaTypePolicy fileMediaTypePolicy = new FileMediaTypePolicy(properties);
 
         validationService = new FileValidationService(List.<FileValidator>of(
                 new FilenameValidator(),

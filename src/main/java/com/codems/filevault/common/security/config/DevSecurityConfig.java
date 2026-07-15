@@ -1,8 +1,8 @@
 package com.codems.filevault.common.security.config;
 
+import com.codems.filevault.common.security.filter.JwtAuthenticationFilter;
 import com.codems.filevault.common.security.handler.CustomAccessDeniedHandler;
 import com.codems.filevault.common.security.handler.CustomAuthenticationEntryPoint;
-import com.codems.filevault.common.security.filter.JwtAuthenticationFilter;
 import com.codems.filevault.domain.user.entity.Role;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -24,16 +24,15 @@ public class DevSecurityConfig {
 
     private final List<String> publicPaths;
     private final List<String> userPaths;
-    private final List<String> adminPaths;
+
     private final CorsConfigurationSource corsConfigurationSource;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public DevSecurityConfig(@Qualifier("publicPaths") List<String> publicPaths, @Qualifier("userPaths") List<String> userPaths, @Qualifier("adminPaths") List<String> adminPaths, CorsConfigurationSource corsConfigurationSource, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public DevSecurityConfig(@Qualifier("publicPaths") List<String> publicPaths, @Qualifier("userPaths") List<String> userPaths, CorsConfigurationSource corsConfigurationSource, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.publicPaths = publicPaths;
         this.userPaths = userPaths;
-        this.adminPaths = adminPaths;
         this.corsConfigurationSource = corsConfigurationSource;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
         this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
@@ -48,15 +47,14 @@ public class DevSecurityConfig {
                 .authorizeHttpRequests(auth -> {
                             publicPaths.forEach(path -> auth.requestMatchers(path).permitAll());
                             userPaths.forEach(path -> auth.requestMatchers(path).hasRole(Role.USER.name()));
-                            adminPaths.forEach(path -> auth.requestMatchers(path).hasRole(Role.ADMIN.name()));
-                    auth.anyRequest().denyAll();
+                            auth.anyRequest().denyAll();
                         }
                 )
                 .exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler)
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .build();
     }

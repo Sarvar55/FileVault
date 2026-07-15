@@ -1,22 +1,17 @@
 package com.codems.filevault.common.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-@Component
+@Validated
 @ConfigurationProperties(prefix = "app.cors")
-@Getter
-@Setter
-public class CorsConfigProperties {
-    private String[] allowedOrigins;
-
-    private String[] allowedMethods;
-
-    private String[] allowedHeaders;
-
-    private boolean allowCredentials;
-
-    private Long maxAge;
+public record CorsConfigProperties(
+        @NotEmpty String[] allowedOrigins,
+        @NotEmpty String[] allowedMethods,
+        @NotEmpty String[] allowedHeaders,
+        boolean allowCredentials,
+        @PositiveOrZero Long maxAge
+) {
 }
