@@ -4,6 +4,9 @@ import com.codems.filevault.common.security.filter.JwtAuthenticationFilter;
 import com.codems.filevault.common.security.handler.CustomAccessDeniedHandler;
 import com.codems.filevault.common.security.handler.CustomAuthenticationEntryPoint;
 import com.codems.filevault.domain.user.entity.Role;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +23,12 @@ import java.util.List;
 
 @Configuration
 @Profile("dev")
+@RequiredArgsConstructor
 public class DevSecurityConfig {
 
+    @Qualifier("publicPaths")
     private final List<String> publicPaths;
+    @Qualifier("userPaths")
     private final List<String> userPaths;
 
     private final CorsConfigurationSource corsConfigurationSource;
@@ -30,26 +36,16 @@ public class DevSecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public DevSecurityConfig(@Qualifier("publicPaths") List<String> publicPaths, @Qualifier("userPaths") List<String> userPaths, CorsConfigurationSource corsConfigurationSource, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.publicPaths = publicPaths;
-        this.userPaths = userPaths;
-        this.corsConfigurationSource = corsConfigurationSource;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
-
     @Bean
     SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> {
-                            publicPaths.forEach(path -> auth.requestMatchers(path).permitAll());
-                            userPaths.forEach(path -> auth.requestMatchers(path).hasRole(Role.USER.name()));
-                            auth.anyRequest().denyAll();
-                        }
-                )
+                    publicPaths.forEach(path -> auth.requestMatchers(path).permitAll());
+                    userPaths.forEach(path -> auth.requestMatchers(path).hasRole(Role.USER.name()));
+                    auth.anyRequest().denyAll();
+                })
                 .exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler)
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
