@@ -228,7 +228,46 @@ printf 'your-jwt-secret-at-least-32-characters!!'   > secrets/JWT_SECRET
 
 Tests include:
 - `FileValidationServiceTests` — multi-layer upload validation (unit)
-- `OrphanFileCleanupServiceTests` — cleanup logic with Mockito (unit)
+- `OrphanFileCleanupServiceTests` — cleanup logic with Object Mother pattern (unit)
+
+---
+
+## 📋 Logging
+
+Logging is configured in `src/main/resources/logback-spring.xml` and varies by profile.
+
+| Profile | Output | Format | Min Level |
+|---------|--------|--------|-----------|
+| `local` | Console only | Coloured human-readable | `DEBUG` |
+| `dev` | Console + rolling file (`logs/file-vault-dev.log`) | Coloured human-readable | `DEBUG` |
+| `prod` | Rolling file only (`logs/file-vault-prod.json`) | **Logstash JSON** | `WARN` |
+
+### Log Levels per Profile
+
+| Logger | local | dev | prod |
+|--------|-------|-----|------|
+| `com.codems.filevault` (app) | `DEBUG` | `DEBUG` | `WARN` (root) |
+| `org.springframework.web` | `INFO` | `INFO` | `WARN` |
+| `org.springframework.security` | `INFO` | `INFO` | `WARN` |
+| `org.hibernate.SQL` | `DEBUG` | `DEBUG` | off |
+| `org.hibernate.orm.jdbc.bind` | `TRACE` | `TRACE` | off |
+| `org.flywaydb` | `INFO` | `INFO` | off |
+
+### Rolling Policy (dev & prod)
+
+- **Max file size:** 10 MB
+- **Dev retention:** 7 days, 100 MB total cap
+- **Prod retention:** 30 days, 1 GB total cap
+- Rotated files are gzip-compressed automatically
+
+### AOP Request Logging
+
+Every controller and service method execution is traced by `ApplicationLoggingAspect`:
+
+- **`DEBUG`** — method started
+- **`INFO`** — method completed with duration in ms
+- **`WARN`** — method failed with a known `BaseException`
+- **`ERROR`** — method failed with an unexpected exception (full stack trace)
 
 ---
 

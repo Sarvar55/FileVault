@@ -1,13 +1,14 @@
 package com.codems.filevault.domain.file.service;
 
+import static com.codems.filevault.domain.file.service.OrphanCleanupMother.ACTIVE_JPG;
+import static com.codems.filevault.domain.file.service.OrphanCleanupMother.ORPHAN_PNG;
+import static com.codems.filevault.domain.file.service.OrphanCleanupMother.SOFT_DELETED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codems.filevault.common.config.properties.FileCleanupProperties;
 import com.codems.filevault.domain.file.repository.FileMetadataRepository;
-import java.time.Duration;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,27 +29,29 @@ class OrphanFileCleanupServiceTests {
 
     @BeforeEach
     void setUp() {
-        FileCleanupProperties properties = new FileCleanupProperties();
-        properties.setOrphanGracePeriod(Duration.ofHours(24));
-        cleanupService = new OrphanFileCleanupService(storageService, fileMetadataRepository, properties);
+        cleanupService = new OrphanFileCleanupService(
+                storageService,
+                fileMetadataRepository,
+                OrphanCleanupMother.defaultProperties()
+        );
     }
 
     @Test
-    void deletesOnlyFilesWithoutActiveMetadata() {
+    void should_deleteOnlyOrphanFile_when_storageContainsBothOrphanAndActiveFiles() {
+        Set<String> storageFiles = Set.of(ORPHAN_PNG, ACTIVE_JPG);
+
         when(fileMetadataRepository.findDeletedStoredFilenames()).thenReturn(Set.of());
-        when(storageService.findStoredFilenamesModifiedBefore(any()))
-                .thenReturn(Set.of("orphan.png", "referenced.pdf"));
-        when(fileMetadataRepository.findExistingStoredFilenames(any()))
-                .thenReturn(Set.of("referenced.pdf"));
+        when(storageService.findStoredFilenamesModifiedBefore(any())).thenReturn(storageFiles);
+        when(fileMetadataRepository.findExistingStoredFilenames(storageFiles)).thenReturn(Set.of(ACTIVE_JPG));
 
         cleanupService.cleanup();
 
-        verify(storageService).delete("orphan.png");
-        verify(storageService, never()).delete("referenced.pdf");
+        verify(storageService).delete(ORPHAN_PNG);
+        verify(storageService, never()).delete(ACTIVE_JPG);
     }
 
     @Test
-    void skipsRepositoryQueryWhenThereAreNoCandidates() {
+    void should_skipMetadataQuery_when_noFilesExistBeyondGracePeriod() {
         when(fileMetadataRepository.findDeletedStoredFilenames()).thenReturn(Set.of());
         when(storageService.findStoredFilenamesModifiedBefore(any())).thenReturn(Set.of());
 
@@ -59,13 +62,37 @@ class OrphanFileCleanupServiceTests {
     }
 
     @Test
-    void deletesPhysicalFilesReferencedBySoftDeletedMetadata() {
-        when(fileMetadataRepository.findDeletedStoredFilenames()).thenReturn(Set.of("deleted.pdf"));
-        when(storageService.exists("deleted.pdf")).thenReturn(true);
+    void should_deletePhysicalFile_when_correspondingMetadataIsSoftDeleted() {
+        when(fileMetadataRepository.findDeletedStoredFilenames()).thenReturn(Set.of(SOFT_DELETED));
+        when(storageService.exists(SOFT_DELETED)).thenReturn(true);
         when(storageService.findStoredFilenamesModifiedBefore(any())).thenReturn(Set.of());
 
         cleanupService.cleanup();
 
-        verify(storageService).delete("deleted.pdf");
+        verify(storageService).delete(SOFT_DELETED);
+    }
+
+    @Test
+    void should_notDeletePhysicalFile_when_softDeletedMetadataExistsButFileIsAlreadyGone() {
+        when(fileMetadataRepository.findDeletedStoredFilenames()).thenReturn(Set.of(SOFT_DELETED));
+        when(storageService.exists(SOFT_DELETED)).thenReturn(false);
+        when(storageService.findStoredFilenamesModifiedBefore(any())).thenReturn(Set.of());
+
+        cleanupService.cleanup();
+
+        verify(storageService, never()).delete(SOFT_DELETED);
+    }
+
+    @Test
+    void should_deleteAllOrphanFiles_when_noneHaveActiveMetadata() {
+        Set<String> allOrphans = OrphanCleanupMother.orphanFilenames();
+
+        when(fileMetadataRepository.findDeletedStoredFilenames()).thenReturn(Set.of());
+        when(storageService.findStoredFilenamesModifiedBefore(any())).thenReturn(allOrphans);
+        when(fileMetadataRepository.findExistingStoredFilenames(allOrphans)).thenReturn(Set.of());
+
+        cleanupService.cleanup();
+
+        allOrphans.forEach(filename -> verify(storageService).delete(filename));
     }
 }
