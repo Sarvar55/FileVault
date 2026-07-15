@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:18
+    container_name: filevault-db-prod
+    restart: always
+    env_file:
+      - .env.prod
+    ports:
+      - "5432:5432"
+    volumes:
+      - file-vault-prod-postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: filevault
+    container_name: filevault-prod
+    build:
+      context: .
+      dockerfile: dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.prod
+    ports:
+      - "8080:8080"
+    volumes:
+      - file-vault-prod-app_logs:/app/logs
+      - file-vault-prod-storage:/tmp/file-vault/storage
+    restart: always
+
+volumes:
+  file-vault-prod-postgres_data:
+  file-vault-prod-app_logs:
+  file-vault-prod-storage:

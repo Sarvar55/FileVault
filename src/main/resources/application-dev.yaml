@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: file-vault
+  config:
+    activate:
+      on-profile: dev
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    password: ${DATABASE_PASSWORD}
+    username: ${DATABASE_USERNAME}
+    url: ${DATABASE_URL}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8080
+  shutdown: graceful
+
+app:
+  jwt:
+    secret: local-development-jwt-secret-32-bytes
+    expiration: 3600000
+  cors:
+    allowed-origins: http://localhost:3000
+    allow-credentials: true
+    allowed-methods: "*"
+    allowed-headers: "*"
+    max-age: 3600
+file:
+  allowed-types:
+    jpg: image/jpeg
+    jpeg: image/jpeg
+    png: image/png
+    pdf: application/pdf
+    docx: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  storage:
+    root-path: ./storage/dev
+  upload:
+    max-size: 10MB
+  cleanup:
+    enabled: true
+    fixed-delay: PT1H
+    orphan-grace-period: PT24H

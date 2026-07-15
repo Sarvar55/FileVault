@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:18
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-file_vault}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD_FILE: /run/secrets/DB_PASSWORD
+    secrets:
+      - DB_PASSWORD
+    ports:
+      - "5433:5432"
+    volumes:
+      - file-vault-postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: filevault
+    container_name: filevault
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: dockerfile
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DATABASE_URL: jdbc:postgresql://db:5432/file_vault
+      DATABASE_USERNAME: user
+    secrets:
+      - source: DB_PASSWORD
+        target: DATABASE_PASSWORD
+      - JWT_SECRET
+    volumes:
+      - app_logs:/app/logs
+
+    ports:
+      - "8080:8080"
+    restart: always
+
+volumes:
+  file-vault-postgres_data:
+  app_logs:
+
+secrets:
+  DB_PASSWORD:
+    file: ./secrets/DB_PASSWORD
+  JWT_SECRET:
+    file: ./secrets/JWT_SECRET
