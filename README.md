@@ -77,8 +77,8 @@ src/main/java/com/codems/filevault/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/file-vault.git
-cd file-vault
+git clone https://github.com/Sarvar55/FileVault.git
+cd FileVault
 
 # Run with local profile
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
